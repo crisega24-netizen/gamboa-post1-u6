@@ -72,19 +72,21 @@ class GestorPedidosTest {
 
     @Test
     void aplicaDescuentoVip() {
-        // Cliente 2 (VIP), 6 unidades de producto 2 ($100.000 c/u) = subtotal $600.000 -> tramo 10%
+        // Cliente 2 (VIP), 6 unidades de producto 2 ($100.000 c/u) = subtotal $600.000 -> tramo 10% VIP,
+        // pero Black Friday (25%, activa via application.properties) gana por ser mayor
         ResultadoPedido resultado = gestorPedidos.procesarPedido(pedido(2L, "vip@correo.com", 2L, 6));
         System.out.println("[Descuento VIP] confirmado=" + resultado.isConfirmado() + " total=" + resultado.getTotal());
         assertTrue(resultado.isConfirmado());
-        assertEquals(642600.0, resultado.getTotal(), 0.01);
+        assertEquals(535500.0, resultado.getTotal(), 0.01);
     }
 
     @Test
     void aplicaDescuentoFrecuente() {
-        // Cliente 3 (FRECUENTE) con 11 pedidos previos sembrados -> descuento 8%
+        // Cliente 3 (FRECUENTE) con 11 pedidos previos sembrados -> tramo 8% FRECUENTE,
+        // pero Black Friday (25%, activa via application.properties) gana por ser mayor
         ResultadoPedido resultado = gestorPedidos.procesarPedido(pedido(3L, "frecuente@correo.com", 3L, 5));
         System.out.println("[Descuento FRECUENTE] confirmado=" + resultado.isConfirmado() + " total=" + resultado.getTotal());
         assertTrue(resultado.isConfirmado());
-        assertEquals(109480.0, resultado.getTotal(), 0.01);
+        assertEquals(89250.0, resultado.getTotal(), 0.01);
     }
 }
