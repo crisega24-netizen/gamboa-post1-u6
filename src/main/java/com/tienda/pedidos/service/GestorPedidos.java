@@ -1,6 +1,6 @@
 package com.tienda.pedidos.service;
 
-import com.tienda.pedidos.descuento.SelectorEstrategiaDescuento;
+import com.tienda.pedidos.descuento.CalculadorDescuentoFinal;
 import com.tienda.pedidos.dto.PedidoRequest;
 import com.tienda.pedidos.dto.ItemPedido;
 import com.tienda.pedidos.dto.ResultadoPedido;
@@ -14,21 +14,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class GestorPedidos {
     private final ValidadorPedido primerValidador;
-    private final SelectorEstrategiaDescuento selector;
+    private final CalculadorDescuentoFinal calculadorDescuento;
     private final PedidoRepository repository;
     private final NotificacionPedidoService notificacion;
     private final JdbcTemplate jdbcTemplate;
 
     public GestorPedidos(ValidadorStock stock, ValidadorCliente cliente,
-                      SelectorEstrategiaDescuento selector, PedidoRepository repository,
+                      CalculadorDescuentoFinal calculadorDescuento, PedidoRepository repository,
                       NotificacionPedidoService notificacion, JdbcTemplate jdbcTemplate) {
-                        stock.encadenar(cliente);
-                        this.primerValidador = stock;
-                        this.selector = selector;
-                        this.repository = repository;
-                        this.notificacion = notificacion;
-                        this.jdbcTemplate = jdbcTemplate;
-                    }
+        stock.encadenar(cliente);
+        this.primerValidador = stock;
+        this.calculadorDescuento = calculadorDescuento;
+        this.repository = repository;
+        this.notificacion = notificacion;
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     public ResultadoPedido procesarPedido(PedidoRequest request) {
         ContextoPedido contexto = new ContextoPedido(request);
@@ -38,7 +38,7 @@ public class GestorPedidos {
         double subtotal = calcularSubtotal(request);
         contexto.setSubtotal(subtotal);
 
-        double descuento = selector.seleccionar(contexto.getTipoCliente()).calcular(contexto);
+        double descuento = calculadorDescuento.calcular(contexto);
         double impuesto = (subtotal - subtotal * descuento) * 0.19;
         double total = subtotal - (subtotal * descuento) + impuesto;
 
